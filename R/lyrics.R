@@ -15,7 +15,7 @@ scrape_lyrics_id <- function(song_id, access_token=genius_token()) {
   meta <- get_song_meta(song_id)
 
   # start session
-  session <-suppressWarnings(rvest::html(meta$song_lyrics_url))
+  session <- xml2::read_html(meta$song_lyrics_url)
 
   # read lyrics
   lyrics <- rvest::html_nodes(session, ".lyrics p")
@@ -26,9 +26,6 @@ scrape_lyrics_id <- function(song_id, access_token=genius_token()) {
 
   # get plain text lyrics
   lyrics <- rvest::html_text(lyrics)
-
-  # keep first element
-  lyrics <- lyrics[1]
 
   # split on line break
   lyrics <- unlist(stringr::str_split(lyrics, pattern = "\n"))
@@ -66,8 +63,11 @@ scrape_lyrics_id <- function(song_id, access_token=genius_token()) {
 #' @export
 scrape_lyrics_url <- function(song_lyrics_url, access_token=genius_token()) {
 
+  # check for internet
+  check_internet()
+
   # start session
-  session <-suppressWarnings(rvest::html(song_lyrics_url))
+  session <- xml2::read_html(song_lyrics_url)
 
   # get meta data
   song <- rvest::html_nodes(session, ".header_with_cover_art-primary_info-title") %>%
@@ -86,9 +86,6 @@ scrape_lyrics_url <- function(song_lyrics_url, access_token=genius_token()) {
   # get plain text lyrics
   lyrics <- rvest::html_text(lyrics)
 
-  # keep first element
-  lyrics <- lyrics[1]
-
   # split on line break
   lyrics <- unlist(stringr::str_split(lyrics, pattern = "\n"))
 
@@ -97,6 +94,11 @@ scrape_lyrics_url <- function(song_lyrics_url, access_token=genius_token()) {
 
   # remove lines with square brackets
   lyrics <- lyrics[!stringr::str_detect(lyrics, pattern = "\\[|\\]")]
+
+  # error handling for instrumental songs, writes NA if there are no lyrics
+  if (purrr::is_empty(lyrics)) {
+    lyrics[1] <- NA
+  }
 
   # Convert to tibble
   lyrics <- tibble::tibble(line = lyrics)
