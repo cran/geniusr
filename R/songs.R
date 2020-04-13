@@ -1,77 +1,295 @@
-#' Retrieve meta data for all of an artist's appearances on Genius
+# set custom genius song class
+as_genius_song <- function(content, path, response) {
+
+  structure(
+    list(
+      content = content,
+      path = path,
+      response = response
+    ),
+    class = "genius_song"
+  )
+}
+
+#' Slightly more human-readable output for genius_song objects
 #'
-#' Return meta data for all appearances (features optional) of an artist on Genius.
-#' @param artist_id An artist ID (\code{artist_id} returned in \code{\link{search_artist}})
-#' @param include_features Whether to return results where artist isn't the primary artist (logical, defaults to FALSE)
+#' @param x a genius_song object
+#' @param ... ignored
+#' @export
+print.genius_song <- function(x, ...) {
+
+  cat(x$content$full_title, " <", x$path, ">\n", sep = "")
+  utils::str(x$content, max=1)
+  invisible(x)
+
+}
+
+#' Retrieve metadata for a song
+#'
+#' The Genius API lets you return data for a specific song, given a song ID.
+#' \code{get_song} returns this data in full.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song_df}} to return a tidy data frame.
+#'
+#' @param song_id ID of the song (\code{song_id} within an object returned by
+#' \code{\link{search_song}})
 #' @param access_token Genius' client access token, defaults to \code{genius_token}
+#'
+#' @return a \code{genius_song} object that contains the extracted content from the request,
+#' the original JSON response object and the request path.
+#'
 #' @examples
 #' \dontrun{
-#' get_artist_songs(artist_id = 1421)
+#' get_song(song_id = 3039923)
 #' }
 #' @export
-get_artist_songs <- function(artist_id, include_features=FALSE, access_token=genius_token()) {
+get_song <- function(song_id, access_token = genius_token()) {
 
-  # check for internet
   check_internet()
 
-  pri_artist_id <- artist_id
+  path <- sprintf("api.genius.com/songs/%s", song_id)
 
-  # base URL
-  base_url <- "api.genius.com/artists/"
+  # request track
+  req <- genius_get(url = path, access_token)
 
-  track_lyric_urls <- list()
+  stop_for_status(req)
 
-  i <- 1
+  res <- content(req)
 
-  while (i > 0) {
-  # search for artist's songs
-  req <- httr::GET(url = paste0(base_url, artist_id, "/songs", '?per_page=', 10, '&page=', i),
-                   httr::add_headers(Authorization=paste0("Bearer ", access_token)))
+  as_genius_song(
+    res$response$song, path, req
+  )
+}
 
-  # stop if unexpected request status returned
-  httr::stop_for_status(req)
+#' Convert genius_song object to a data frame
+#'
+#' @param x a \code{genius_song} object
+#'
+#' @return a tibble
+#' @export
+#'
+#'
+#' @examples
+#' \dontrun{
+#' song <- get_song(song_id = 3039923)
+#' song_to_df(song)
+#' }
+#'
+song_to_df <- function(x) {
 
-  # extract request content
-  res <- httr::content(req)
+  stopifnot(is_genius_song(x))
 
-  # drill down
-  res <- res$response
+  song <- x$content
 
-  # extract track info from returned results
-  song_info <- purrr::map_df(1:length(res$songs), function(x) {
-    tmp <- res$songs[[x]]
-    art <- res$songs[[x]]$primary_artist
-    list(
-      song_id = tmp$id,
-      song_name = tmp$title_with_featured,
-      song_lyrics_url = tmp$url,
-      annotation_count = tmp$annotation_count,
-      artist_id = art$id,
-      artist_name = art$name,
-      artist_url = art$url
-    )
+  # grab album, artist, stat data
+  album <- song$album
+  artist <- song$primary_artist
+  stats <- song$stats
+
+  # make list for song_info
+  song_info <- list(
+    song_id = song$id,
+    song_name = song$title_with_featured,
+    song_lyrics_url = song$url,
+    song_art_image_url = song$song_art_image_url,
+    song_release_date = song$release_date,
+    song_pageviews = stats$pageviews,
+    song_annotation_count = song$annotation_count,
+    artist_id = artist$id,
+    artist_name = artist$name,
+    artist_url = artist$url,
+    album_id = album$id,
+    album_name = album$name,
+    album_url = album$url
+  )
+
+  # find list indices of NULL values, change to NA
+  ndxNULL <- which(unlist(lapply(song_info, is.null)))
+  for(i in ndxNULL){ song_info[[i]] <- NA }
+
+  as_tibble(song_info)
+}
+
+#' Retrieve metadata for a song
+#'
+#' The Genius API lets you search for meta data for a song, given a song ID.
+#' \code{get_song_meta} returns this data in a tidy, but reduced, format.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song}} to return data in full as a list.
+#'
+#' @inheritParams get_song
+#'
+#' @return a tibble
+#'
+#' @examples
+#' \dontrun{
+#' get_song_df(song_id = 3039923)
+#' }
+#'
+#' @export
+get_song_df <- function(song_id, access_token = genius_token()) {
+
+  # pull song meta
+  song <- get_song(song_id, access_token)
+
+  song_to_df(song)
+}
+
+
+#' Extract song relationships from a Genius song
+#'
+#' Extract "song relationships" info from a Genius song object, as a tidy tibble.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song}} to generate a Genius song object.
+#'
+#' @param x A \code{genius_song} object
+#'
+#' @return a tibble
+#'
+#' @examples
+#' \dontrun{
+#' song <- get_song(song_id = 3039923)
+#'
+#' tidy_song_relationships(song)
+#' }
+#'
+#' @export
+tidy_song_relationships <- function(x) {
+
+  stopifnot(is_genius_song(x))
+
+  relationships <- map_dfr(x$content$song_relationships, function(x) {
+
+    songs <- map_dfr(x$songs, function(y) {
+
+      y <- as_genius_song(content = y, path = "foo", response = "foo")
+      song_to_df(y)
+    })
+
+    if (nrow(songs) == 0) return(songs)
+
+    songs$type <- x$type
+
+    songs
   })
 
-  track_lyric_urls[[i]] <- song_info
+  relationships <- prefix_colnames(relationships, "song_relationships")
 
-  if (!is.null(res$next_page)) {
-    i <- res$next_page
-  } else {
-    break
-  }
+  relationships$song_id <- x$content$id
 
-  }
+  select(relationships, song_id, song_relationships_type,
+         everything())
+}
 
-  # bind rows of results
-  track_lyrics <- do.call("rbind", track_lyric_urls)
+#' Extract custom performances from a Genius song
+#'
+#' Extract "custom performances" (i.e. other song credits) info from a Genius song object,
+#' as a tidy tibble.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song}} to generate a Genius song object.
+#'
+#' @inheritParams tidy_song_relationships
+#'
+#' @return a tibble
+#'
+#' @examples
+#' \dontrun{
+#' song <- get_song(song_id = 3039923)
+#'
+#' tidy_song_performances(song)
+#' }
+#'
+#' @export
+tidy_song_performances <- function(x) {
 
-  # keep / discard features
-  if (include_features == FALSE) {
+  stopifnot(is_genius_song(x))
 
-    track_lyrics <- subset(track_lyrics, `artist_id` == pri_artist_id)
+  credits <- map_dfr(x$content$custom_performances, function(x) {
 
-  } else if (include_features == TRUE) NULL
+    people <- map_dfr(x$artists, function(y) dplyr::bind_rows(y))
 
-  return(tibble::as_tibble(track_lyrics))
+    if (nrow(people) == 0) return(people)
+
+    people$label <- x$label
+
+    people
+  })
+
+  credits <- prefix_colnames(credits, "custom_performances")
+
+  credits$song_id <- x$content$id
+
+  select(credits, song_id, custom_performances_label,
+         custom_performances_name, everything())
+
+}
+
+#' Extract producer credits from a Genius song
+#'
+#' Extract "producer artists" (i.e. producer credits) info from a Genius song object,
+#' as a tidy tibble.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song}} to generate a Genius song object.
+#'
+#' @inheritParams tidy_song_relationships
+#'
+#' @return a tibble
+#'
+#' @examples
+#' \dontrun{
+#' song <- get_song(song_id = 3039923)
+#'
+#' tidy_song_producers(song)
+#' }
+#'
+#' @export
+tidy_song_producers <- function(x) {
+
+  stopifnot(is_genius_song(x))
+
+  producers <- bind_rows(x$content$producer_artists)
+
+  producers <- prefix_colnames(producers, "producer_artists")
+  producers$song_id <- x$content$id
+
+  select(producers, song_id, producer_artists_name, everything())
+
+}
+
+#' Extract writer credits from a Genius song
+#'
+#' Extract "writer artists" (i.e. writer credits) info from a Genius song object,
+#' as a tidy tibble.
+#'
+#' @family song
+#' @seealso See \code{\link{get_song}} to generate a Genius song object.
+#'
+#' @inheritParams tidy_song_relationships
+#'
+#' @return a tibble
+#'
+#' @examples
+#' \dontrun{
+#' song <- get_song(song_id = 3039923)
+#'
+#' tidy_song_writers(song)
+#' }
+#'
+#' @export
+tidy_song_writers <- function(x) {
+
+  stopifnot(is_genius_song(x))
+
+  writers <- bind_rows(x$content$writer_artists)
+
+  writers <- prefix_colnames(writers, "writer_artists")
+  writers$song_id <- x$content$id
+
+  select(writers, song_id, writer_artists_name, everything())
 
 }

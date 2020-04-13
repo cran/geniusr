@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>geniusr: the basics</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">geniusr: the basics</h1>
+
+
+
+<p>The <code>geniusr</code> package is designed to help you retrieve data from <a href="https://genius.com/">Genius</a>. Most of this data falls into one of two distinct categories:</p>
+<ul>
+<li><em>Genius</em> <strong>Resource</strong> (e.g. artists, songs, albums) metadata</li>
+<li>Song <strong>lyrics</strong> (hosted on <em>Genius</em>)</li>
+</ul>
+<p>Functionality in both of these areas will be demonstrated once API authentication is dealt with. Make sure to <a href="https://ewenme.github.io/geniusr/reference/index.html">read more in the docs</a> for detailed guidance on all package features.</p>
+<div id="auth" class="section level2">
+<h2>Authentication</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(geniusr)</a></code></pre></div>
+<p><code>geniusr</code> data retrieval is typically done by making <em>authenticated</em> requests to the <a href="https://docs.genius.com/">Genius API</a>. This necessitates a few common steps:</p>
+<ol style="list-style-type: decimal">
+<li>Create a Genius API client via the <a href="https://genius.com/api-clients/new">API Client management page</a></li>
+<li>Generate a client access token from your <a href="https://genius.com/api-clients">API clients page</a></li>
+<li>Pass your access token to a <code>GENIUS_API_TOKEN</code> environment variable by explicitly calling the <code>genius_token()</code> function, or when prompted by other functions</li>
+</ol>
+<p>Once you have set the <code>GENIUS_API_TOKEN</code> environment variable, it will be active for the rest of the session and automatically called (via <code>genius_token()</code>) when using <code>geniusr</code> functions to request data.</p>
+</div>
+<div id="resources" class="section level2">
+<h2>Resources</h2>
+<p>The first family of data retrieval functions help with accessing data from various types of Genius <strong>Resources</strong>, explored in turn below.</p>
+<div id="songs" class="section level3">
+<h3>Songs</h3>
+<p>Functions for requesting data on <strong>songs</strong> hosted on Genius take the form <code>get_song_xxx()</code>. For example, <code>get_song()</code> returns details about the song itself, as well as user annotations that are attached to it, as a <code>genius_song</code> object.</p>
+<p>For details about the track <em>Sing About Me, I’m Dying of Thirst</em> by Kendrick Lamar:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">get_song</span>(<span class="dt">song_id =</span> <span class="dv">90479</span>)</a></code></pre></div>
+</div>
+<div id="artists" class="section level3">
+<h3>Artists</h3>
+<p>Functions for requesting data on an <strong>artist</strong> (i.e. the creator of one or more songs hosted on Genius) take the form <code>get_artist_xxx()</code>. For example, <code>get_artist()</code> returns details about the artist as a <code>genius_artist</code> object</p>
+<p>For info about the artist Kendrick Lamar:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">get_artist</span>(<span class="dt">artist_id =</span> <span class="dv">1421</span>)</a></code></pre></div>
+</div>
+<div id="albums" class="section level3">
+<h3>Albums</h3>
+<p>Functions for requesting data on an <strong>album</strong> take the form <code>get_album_xxx()</code>. For example, <code>get_album()</code> returns details about the artist as a <code>genius_album</code> object.</p>
+<p>For info on the album <em>Good Kid, M.A.A.D City</em> by Kendrick Lamar:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">get_album</span>(<span class="dt">album_id =</span> <span class="dv">491200</span>)</a></code></pre></div>
+</div>
+<div id="search" class="section level3">
+<h3>Search</h3>
+<p>Functions for <strong>searching</strong> all content hosted on Genius take the form <code>search_xxx()</code>. For example, <code>search_genius()</code> returns documents matching a search term(s) as a <code>genius_resource</code> object.</p>
+<p>We can look for documents that match the search term “Compton”.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">search_genius</span>(<span class="dt">search_term =</span> <span class="st">&quot;Compton&quot;</span>)</a></code></pre></div>
+</div>
+<div id="simplify" class="section level3">
+<h3>Simplify</h3>
+<p>The functions introduced above all return fairly complex list objects that are not <em>immediately</em> ready for many analytical workflows. The <code>get_artist|album|song()</code> functions all have sister functions that prepare a tibble (data frame) for you.</p>
+<p>Here’s <code>get_song()</code> in action…</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">get_song</span>(<span class="dt">song_id =</span> <span class="dv">3889</span>)</a></code></pre></div>
+<p>…and here’s <code>get_song_df()</code>, retrieving data for the same song:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw">get_song_df</span>(<span class="dt">song_id =</span> <span class="dv">3889</span>)</a></code></pre></div>
+<p>The <code>get_album|artist|song_df()</code> output is a somewhat simplified version of the <code>get_album|artist|song()</code> counterpart, so make sure to check the original function objects if you need the detail.</p>
+<p>Furthermore, there are some <code>tidy_xxx()</code> functions available to help you “un-nest” some of the data holed up in nested lists within <code>genius_song</code> and <code>genius_album</code> objects.</p>
+<p>For example, <code>tidy_song_producers()</code> pulls out producer credits from a <code>genius_song()</code> object as a tidy tibble:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">song &lt;-<span class="st"> </span><span class="kw">get_song</span>(<span class="dt">song_id =</span> <span class="dv">89</span>)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3">song</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="kw">tidy_song_producers</span>(song)</a></code></pre></div>
+</div>
+</div>
+<div id="lyrics" class="section level2">
+<h2>Lyrics</h2>
+<p>There are also tools to be found in <code>geniusr</code> that help with Genius lyrics retrieval. These functions take the form…you guessed it…<code>get_lyrics_xxx()</code>. For example, <code>get_lyrics_id()</code> finds song lyrics for a given song id, and returns this data as a tidy tibble - each line of the track as an observation (i.e. a row).</p>
+<p>To complete the look, here’s song lyrics for <em>Sing About Me, I’m Dying of Thirst</em>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">get_lyrics_id</span>(<span class="dt">song_id =</span> <span class="dv">90479</span>)</a></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
