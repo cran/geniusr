@@ -1,6 +1,6 @@
 Package: geniusr
 Title: Tools for Working with the 'Genius' API
-Version: 1.2.0
+Version: 1.2.1
 Authors@R: 
     person("Ewen", "Henderson", email = "ewenhenderson@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-4748-4693"))
@@ -14,13 +14,11 @@ Depends: R (>= 3.2.0)
 License: MIT + file LICENSE
 Imports: curl, dplyr, httr, purrr, rvest, stringr, tibble, xml2
 Suggests: knitr, rmarkdown, testthat (>= 2.1.0), covr
-VignetteBuilder: knitr
 Encoding: UTF-8
-LazyData: yes
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.1
 NeedsCompilation: no
-Packaged: 2020-04-13 11:48:07 UTC; Ewen
+Packaged: 2022-09-03 21:56:42 UTC; Ewen
 Author: Ewen Henderson [aut, cre] (<https://orcid.org/0000-0002-4748-4693>)
 Maintainer: Ewen Henderson <ewenhenderson@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-04-13 12:10:06 UTC
+Date/Publication: 2022-09-03 22:10:02 UTC
